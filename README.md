@@ -8,147 +8,184 @@ L’objectif est de concevoir, déployer et sécuriser plusieurs services commun
 
 ---
 
-## Architecture
+# 1. Service en local (10/20)
 
-Le projet est composé de :
+Un premier microservice a été développé avec Node.js et testé en local.
 
-* user-service : gestion des utilisateurs et point d’entrée principal
-* product-service : gestion des produits
-* PostgreSQL : base de données
-* Ingress (Gateway) : point d’accès externe
-* RBAC : gestion des droits Kubernetes
+## Résultat attendu
 
-### Schéma logique
+Le service doit répondre sur le port 3000.
+
+![User Service Local](images/user-service-local.jpeg)
+
+Ce test valide le bon fonctionnement de l’application avant conteneurisation.
+
+---
+
+# 2. Conteneurisation avec Docker
+
+Le service a été conteneurisé avec Docker :
+
+* création d’un Dockerfile
+* build de l’image
+* exécution du conteneur
+
+## Résultat attendu
+
+Le service fonctionne dans un conteneur Docker.
+
+![User Service Docker](images/user-service.jpeg)
+
+---
+
+# 3. Déploiement Kubernetes (12/20)
+
+Le service a été déployé dans Kubernetes avec :
+
+* Deployment
+* Service (NodePort)
+
+## Résultat attendu
+
+Les pods doivent être en état *Running*.
+
+![Pods Kubernetes](images/kubernetes-pods.jpeg)
+
+Cela confirme que Kubernetes orchestre correctement le service.
+
+---
+
+# 4. Mise en place d’une Gateway (Ingress)
+
+Un Ingress a été configuré pour exposer le service avec une URL propre.
+
+## Résultat attendu
+
+Accès via :
+http://user-service.local
+
+![Ingress](images/user-service-ingress.jpeg)
+
+Cela permet d’accéder au service sans utiliser de port technique.
+
+---
+
+# 5. Ajout d’un deuxième microservice (14/20)
+
+Un second service (product-service) a été développé et déployé.
+
+Les routes sont maintenant accessibles via :
+
+* /users
+* /products
+
+## Résultat attendu
+
+### API Users
+
+![API Users](images/api-users.jpeg)
+
+### API Products
+
+![API Products](images/api-products.jpeg)
+
+Cela valide le bon fonctionnement de plusieurs microservices.
+
+---
+
+# 6. Communication entre microservices
+
+Le user-service communique avec le product-service via Kubernetes :
 
 ```
-Client → Ingress (Gateway)
+http://product-service
+```
+
+Cela permet une architecture distribuée réelle.
+
+---
+
+# 7. Ajout d’une base de données (16/20)
+
+Une base PostgreSQL a été déployée dans Kubernetes.
+
+Le user-service est connecté à cette base.
+
+## Résultat attendu
+
+![Database](images/api-database.jpeg)
+
+Le service retourne des données issues de la base.
+
+---
+
+# 8. Sécurisation du cluster (18/20)
+
+Mise en place de RBAC pour contrôler les accès.
+
+## Résultat attendu
+
+### Autorisation
+
+![RBAC OK](images/rbac-security_2.jpeg)
+
+### Refus
+
+![RBAC DENIED](images/rbac-security_1.jpeg)
+
+Certaines actions sont autorisées (list), d’autres interdites (delete).
+
+---
+
+# 9. Architecture globale
+
+## Structure du projet
+
+![Structure](images/project-structure.png)
+
+## Architecture logique
+
+```
+Client → Ingress
         ↓
-   ┌───────────────┬───────────────┐
-   │ user-service  │ product-service │
-   └───────────────┴───────────────┘
+   user-service → product-service
             ↓
         PostgreSQL
 ```
 
 ---
 
-## Technologies utilisées
+# 10. Lancer le projet
 
-* Node.js (Express) : API REST
-* Docker : conteneurisation
-* Kubernetes (Minikube) : orchestration
-* Ingress NGINX : gateway HTTP
-* PostgreSQL : base de données
-* RBAC Kubernetes : sécurité
-
----
-
-## Docker
-
-Chaque service a été conteneurisé avec Docker :
-
-* Création de Dockerfile
-* Build et publication sur Docker Hub
-
----
-
-## Kubernetes
-
-Déploiement complet avec :
-
-* Deployment
-* Service (NodePort / ClusterIP)
-* Ingress (gateway)
-* Base de données PostgreSQL
-
----
-
-## Gateway (Ingress)
-
-Un Ingress a été configuré pour exposer les services via :
-
-* http://app.local/users
-* http://app.local/products
-* http://app.local/products-from-user
-* http://app.local/db
-
----
-
-## Communication entre microservices
-
-Le user-service communique avec le product-service via le DNS interne Kubernetes :
-
-```
-http://product-service
-```
-
----
-
-## Base de données
-
-* PostgreSQL déployé dans Kubernetes
-* Connexion depuis user-service
-* Endpoint de test : /db
-
----
-
-## Sécurité
-
-Mise en place de bonnes pratiques :
-
-* RBAC Kubernetes (contrôle des accès)
-* Limitation des ressources (CPU / RAM)
-* Sécurisation des conteneurs (runAsNonRoot)
-* imagePullPolicy: Always
-
----
-
-## Structure du projet
-
-```
-microservices-project/
-├── user-service/
-├── product-service/
-├── k8s/
-```
-
----
-
-## Lancer le projet
-
-```
+```bash
 minikube start
 kubectl apply -f k8s/
 minikube tunnel
 ```
 
-Configurer le fichier /etc/hosts :
+Configurer :
 
-```
+```bash
 127.0.0.1 app.local
 ```
 
 ---
 
-## Objectifs atteints
+# Conclusion
 
-* Architecture microservices
-* Déploiement Docker et Kubernetes
-* Communication inter-services
-* Gateway avec Ingress
-* Base de données intégrée
-* Sécurisation du cluster
+Ce projet démontre :
 
----
-
-## Conclusion
-
-Ce projet démontre la mise en œuvre complète d’une application distribuée moderne en respectant les bonnes pratiques de développement, de déploiement et de sécurité.
+* la création de microservices
+* leur conteneurisation avec Docker
+* leur orchestration avec Kubernetes
+* la mise en place d’une gateway
+* la communication entre services
+* l’intégration d’une base de données
+* la sécurisation du cluster
 
 ---
 
-## Auteurs
+# Auteurs
 
 Ayoub ERRAHMANI
-
 Samuel DARMALINGON
