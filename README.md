@@ -2,148 +2,139 @@
 
 ## Description
 
-Ce projet présente la mise en place d’une architecture microservices complète en utilisant Node.js, Docker et Kubernetes (Minikube).
+Ce projet présente la mise en place d’une architecture microservices en utilisant Node.js, Docker et Kubernetes (Minikube).
 
 L’objectif est de concevoir, déployer et sécuriser plusieurs services communicants dans un environnement distribué.
 
 ---
 
-# 1. Service en local (10/20)
+## 1. Développement d’un microservice
 
-Un premier microservice a été développé avec Node.js et testé en local.
+Un premier microservice a été développé avec Node.js (Express).
+Ce service expose une API REST simple permettant de vérifier son bon fonctionnement.
 
-## Résultat attendu
-
-Le service doit répondre sur le port 3000.
+### Résultat
 
 ![User Service Local](images/user-service-local.jpeg)
 
-Ce test valide le bon fonctionnement de l’application avant conteneurisation.
+Le service répond correctement en local, ce qui valide le bon fonctionnement de l’application avant son déploiement.
 
 ---
 
-# 2. Conteneurisation avec Docker
+## 2. Conteneurisation avec Docker
 
-Le service a été conteneurisé avec Docker :
+Le microservice a ensuite été conteneurisé avec Docker :
 
 * création d’un Dockerfile
-* build de l’image
+* construction de l’image
 * exécution du conteneur
 
-## Résultat attendu
-
-Le service fonctionne dans un conteneur Docker.
+### Résultat
 
 ![User Service Docker](images/user-service.jpeg)
 
+Le service est accessible depuis un conteneur, ce qui garantit sa portabilité.
+
 ---
 
-# 3. Déploiement Kubernetes (12/20)
+## 3. Déploiement avec Kubernetes
 
-Le service a été déployé dans Kubernetes avec :
+Le service a été déployé dans Kubernetes (Minikube) avec :
 
-* Deployment
-* Service (NodePort)
+* un Deployment pour gérer les pods
+* un Service pour exposer l’application
 
-## Résultat attendu
-
-Les pods doivent être en état *Running*.
+### Résultat
 
 ![Pods Kubernetes](images/kubernetes-pods.jpeg)
 
-Cela confirme que Kubernetes orchestre correctement le service.
+Les pods sont en état *Running*, ce qui confirme le bon déploiement du service dans le cluster.
 
 ---
 
-# 4. Mise en place d’une Gateway (Ingress)
+## 4. Mise en place d’une Gateway (Ingress)
 
-Un Ingress a été configuré pour exposer le service avec une URL propre.
+Une gateway a été configurée avec Ingress afin de permettre un accès simplifié au service via un nom de domaine.
 
-## Résultat attendu
-
-Accès via :
-http://user-service.local
+### Résultat
 
 ![Ingress](images/user-service-ingress.jpeg)
 
-Cela permet d’accéder au service sans utiliser de port technique.
+Le service est accessible via une URL personnalisée sans avoir besoin de spécifier un port.
 
 ---
 
-# 5. Ajout d’un deuxième microservice (14/20)
+## 5. Ajout d’un second microservice
 
-Un second service (product-service) a été développé et déployé.
+Un deuxième microservice (product-service) a été développé et déployé.
 
-Les routes sont maintenant accessibles via :
+L’architecture permet désormais de gérer plusieurs services distincts.
 
-* /users
-* /products
+### Résultats
 
-## Résultat attendu
-
-### API Users
+#### Service utilisateurs
 
 ![API Users](images/api-users.jpeg)
 
-### API Products
+#### Service produits
 
 ![API Products](images/api-products.jpeg)
 
-Cela valide le bon fonctionnement de plusieurs microservices.
+Les deux services fonctionnent correctement et sont accessibles via la gateway.
 
 ---
 
-# 6. Communication entre microservices
+## 6. Communication entre microservices
 
-Le user-service communique avec le product-service via Kubernetes :
+Les microservices communiquent entre eux via le DNS interne de Kubernetes.
 
 ```
 http://product-service
 ```
 
-Cela permet une architecture distribuée réelle.
+Cette communication permet de construire une architecture distribuée cohérente.
 
 ---
 
-# 7. Ajout d’une base de données (16/20)
+## 7. Intégration d’une base de données
 
-Une base PostgreSQL a été déployée dans Kubernetes.
+Une base de données PostgreSQL a été déployée dans Kubernetes.
 
-Le user-service est connecté à cette base.
+Le microservice principal est connecté à cette base afin de stocker et récupérer des données.
 
-## Résultat attendu
+### Résultat
 
 ![Database](images/api-database.jpeg)
 
-Le service retourne des données issues de la base.
+Le service retourne des données provenant de la base, ce qui valide l’intégration.
 
 ---
 
-# 8. Sécurisation du cluster (18/20)
+## 8. Sécurisation du cluster
 
-Mise en place de RBAC pour contrôler les accès.
+Des règles RBAC ont été mises en place afin de contrôler les accès au cluster Kubernetes.
 
-## Résultat attendu
+### Résultats
 
-### Autorisation
+#### Action autorisée
 
 ![RBAC OK](images/rbac-security_2.jpeg)
 
-### Refus
+#### Action refusée
 
 ![RBAC DENIED](images/rbac-security_1.jpeg)
 
-Certaines actions sont autorisées (list), d’autres interdites (delete).
+Certaines actions sont autorisées tandis que d’autres sont bloquées, ce qui garantit la sécurité des ressources.
 
 ---
 
-# 9. Architecture globale
+## 9. Architecture globale
 
-## Structure du projet
+### Structure du projet
 
 ![Structure](images/project-structure.png)
 
-## Architecture logique
+### Organisation logique
 
 ```
 Client → Ingress
@@ -155,37 +146,38 @@ Client → Ingress
 
 ---
 
-# 10. Lancer le projet
+## 10. Lancement du projet
 
-```bash
+```
 minikube start
 kubectl apply -f k8s/
 minikube tunnel
 ```
 
-Configurer :
+Configuration du fichier `/etc/hosts` :
 
-```bash
+```
 127.0.0.1 app.local
 ```
 
 ---
 
-# Conclusion
+## Conclusion
 
-Ce projet démontre :
+Ce projet met en œuvre une architecture microservices complète en respectant les bonnes pratiques de développement et de déploiement.
 
-* la création de microservices
-* leur conteneurisation avec Docker
-* leur orchestration avec Kubernetes
-* la mise en place d’une gateway
+Il illustre :
+
+* la création de services REST
+* la conteneurisation avec Docker
+* l’orchestration avec Kubernetes
 * la communication entre services
 * l’intégration d’une base de données
 * la sécurisation du cluster
 
 ---
 
-# Auteurs
+## Auteurs
 
 Ayoub ERRAHMANI
 Samuel DARMALINGON
